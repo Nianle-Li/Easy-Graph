@@ -145,13 +145,35 @@ def hybrid(cpp_method_name):
     def _hybrid(py_method):
         @functools.wraps(py_method)
         def method(*args, **kwargs):
+            import os
             G = args[0]
+            env_use_cpp = os.environ.get("EASYGRAPH_USE_CPP", "0") == "1"
+            
+            print(f"[DEBUG] 函数: {py_method.__name__}")
+            print(f"[DEBUG] 环境变量EASYGRAPH_USE_CPP={env_use_cpp}")
+            print(f"[DEBUG] 图对象G.cflag={G.cflag}")
+            print(f"[DEBUG] C++函数名: {cpp_method_name}")
+            
             if G.cflag and cpp_method_name is not None:
                 try:
+                    print(f"[DEBUG] 尝试调用C++函数 {cpp_method_name}")
                     cpp_method = getattr(cpp_easygraph, cpp_method_name)
-                    return cpp_method(*args, **kwargs)
+                    print(f"[DEBUG] C++函数已找到")
+                    result = cpp_method(*args, **kwargs)
+                    print(f"[DEBUG] C++函数调用成功")
+                    return result
                 except AttributeError as e:
+                    print(f"[DEBUG] C++函数未找到: {e}")
                     print(f"Warning: {e}. Use python method instead.")
+                except Exception as e:
+                    print(f"[DEBUG] C++函数调用失败: {type(e).__name__}: {e}")
+                    # 可以选择在这里添加详细的异常回溯
+                    import traceback
+                    print(f"[DEBUG] 异常回溯: {traceback.format_exc()}")
+            else:
+                print(f"[DEBUG] 使用Python实现的原因: G.cflag={G.cflag}, cpp_method_name={cpp_method_name}")
+                
+            print(f"[DEBUG] 回退到Python实现")
             return py_method(*args, **kwargs)
 
         return method

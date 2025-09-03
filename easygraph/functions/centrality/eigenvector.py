@@ -316,3 +316,114 @@ def _graph_to_scipy_sparse(G, nodelist=None, weight=None):
     )
     
     return M
+
+
+
+def compare_eigenvector_centrality_speed(n=100, m=200):
+    """
+    比较 EasyGraph (Python 版本和 C++混编) 与 NetworkX 计算特征向量中心性的时间。
+    
+    Parameters
+    ----------
+    n : int, optional (default=100)
+        节点数
+    m : int, optional (default=200)
+        边数
+    
+    Returns
+    -------
+    dict
+        包含各种方法的计算时间: 
+        {'easygraph_cpp_time': ..., 'easygraph_python_time': ..., 'networkx_time': ...}
+    """
+    import time
+    import easygraph as eg
+    import networkx as nx
+    import os
+
+    # 用 networkx 生成随机图，然后转换为 EasyGraph
+    G_nx = nx.gnm_random_graph(n, m)
+    G_eg = eg.from_networkx(G_nx)
+    
+    # 设置环境变量来控制是否使用 C++ 版本
+    results = {}
+    
+    # 1. EasyGraph C++ 混编版本计时
+    os.environ["EASYGRAPH_USE_CPP"] = "1"
+    G_eg.cflag = True 
+    t0 = time.time()
+    eg.eigenvector_centrality(G_eg)
+    t1 = time.time()
+    results["easygraph_cpp_time"] = t1 - t0
+    
+    # 2. EasyGraph Python 版本计时
+    os.environ["EASYGRAPH_USE_CPP"] = "0"
+    t0 = time.time()
+    eg.eigenvector_centrality(G_eg)
+    t1 = time.time()
+    results["easygraph_python_time"] = t1 - t0
+    
+    # 3. NetworkX 计时
+    t0 = time.time()
+    nx.eigenvector_centrality(G_nx)
+    t1 = time.time()
+    results["networkx_time"] = t1 - t0
+    
+    # 恢复环境变量默认值（如果有必要）
+    os.environ.pop("EASYGRAPH_USE_CPP", None)
+    
+    # 打印结果进行比较
+    print(f"节点数: {n}, 边数: {m}")
+    print(f"EasyGraph (C++): {results['easygraph_cpp_time']:.6f} 秒")
+    print(f"EasyGraph (Python): {results['easygraph_python_time']:.6f} 秒")
+    print(f"NetworkX: {results['networkx_time']:.6f} 秒")
+    
+    # 计算加速比
+    if results['networkx_time'] > 0:
+        print(f"EasyGraph (C++) 相比 NetworkX 加速比: {results['networkx_time'] / results['easygraph_cpp_time']:.2f}x")
+    if results['easygraph_python_time'] > 0:
+        print(f"EasyGraph (C++) 相比 EasyGraph (Python) 加速比: {results['easygraph_python_time'] / results['easygraph_cpp_time']:.2f}x")
+    
+    return results
+
+def test_cpp_function():
+    """直接测试C++函数是否可用"""
+    import easygraph as eg
+    import networkx as nx
+    
+    # 首先尝试导入cpp_easygraph模块
+    try:
+        import cpp_easygraph
+        print("成功导入cpp_easygraph模块")
+    except ImportError as e:
+        print(f"错误: 无法导入cpp_easygraph模块 - {e}")
+        print("这可能意味着C++扩展未正确编译或安装")
+        return
+    
+    # 创建一个简单图
+    G_nx = nx.path_graph(4)
+    G_eg = eg.from_networkx(G_nx)
+    G_eg.cflag = True  # 重要：设置cflag
+    
+    # 检查cpp_easygraph模块
+    print("cpp_easygraph中可用的函数:")
+    cpp_funcs = [item for item in dir(cpp_easygraph) if item.startswith("cpp_")]
+    if cpp_funcs:
+        for item in cpp_funcs:
+            print(f" - {item}")
+    else:
+        print("警告: 在cpp_easygraph中找不到任何以'cpp_'开头的函数")
+    
+    # 特别检查我们关心的函数
+    if hasattr(cpp_easygraph, "cpp_eigenvector_centrality"):
+        print("找到cpp_eigenvector_centrality函数")
+        
+        # 尝试直接调用
+        try:
+            print("尝试直接调用cpp_eigenvector_centrality...")
+            result = cpp_easygraph.cpp_eigenvector_centrality(G_eg, None, None, None, None)
+            print(f"调用成功，结果: {result}")
+        except Exception as e:
+            print(f"调用失败: {type(e).__name__}: {e}")
+    else:
+        print("错误: cpp_eigenvector_centrality函数不存在!")

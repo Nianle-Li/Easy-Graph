@@ -4,7 +4,7 @@ PYBIND11_MODULE(cpp_easygraph, m) {
 
     py::class_<Graph>(m, "Graph")
         .def(py::init<>())
-        .def("__init__", &Graph__init__)
+        //.def("__init__", &Graph__init__)
         .def("__iter__", &Graph__iter__)
         .def("__len__", &Graph__len__)
         .def("__contains__", &Graph__contains__, py::arg("node"))
@@ -47,7 +47,7 @@ PYBIND11_MODULE(cpp_easygraph, m) {
 
     py::class_<DiGraph, Graph>(m, "DiGraph")
         .def(py::init<>())
-        .def("__init__", &DiGraph__init__)
+        //.def("__init__", &DiGraph__init__)
         .def("out_degree", &DiGraph_out_degree, py::arg("weight") = "weight")
         .def("in_degree", &DiGraph_in_degree, py::arg("weight") = "weight")
         .def("degree", &DiGraph_degree, py::arg("weight") = "weight")
