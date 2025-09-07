@@ -8,7 +8,7 @@ file(GLOB SOURCES
     functions/*/*.cpp
     cpp_easygraph.cpp
 )
-
+add_definitions(-DPYBIND11_DETAILED_ERROR_MESSAGES)
 add_subdirectory(pybind11)
 
 option(EASYGRAPH_ENABLE_GPU "EASYGRAPH_ENABLE_GPU" OFF)

@@ -77,8 +77,8 @@ PYBIND11_MODULE(cpp_easygraph, m) {
 
     m.def("cpp_closeness_centrality", &closeness_centrality, py::arg("G"), py::arg("weight") = "weight", py::arg("cutoff") = py::none(), py::arg("sources") = py::none());
     m.def("cpp_betweenness_centrality", &betweenness_centrality, py::arg("G"), py::arg("weight") = "weight", py::arg("cutoff") = py::none(),py::arg("sources") = py::none(), py::arg("normalized") = py::bool_(true), py::arg("endpoints") = py::bool_(false));
-    m.def("cpp_eigenvector_centrality", &cpp_eigenvector_centrality, py::arg("G"), py::arg("max_iter") = py::none(), py::arg("tol") = py::none(),py::arg("nstart") = py::none(), py::arg("weight") = py::none(),"Compute eigenvector centrality for the graph G");
-    m.def("cpp_eigenvector_centrality_numpy", &cpp_eigenvector_centrality_numpy,py::arg("G"), py::arg("weight") = py::none(), py::arg("max_iter") = py::none(),py::arg("tol") = py::none(),"Compute eigenvector centrality for the graph G using NumPy");
+    m.def("cpp_eigenvector_centrality", &cpp_eigenvector_centrality, py::arg("G"), py::arg("max_iter") = py::none(), py::arg("tol") = py::none(),py::arg("nstart") = py::none(), py::arg("weight") = py::none());
+    m.def("cpp_eigenvector_centrality_numpy", &cpp_eigenvector_centrality_numpy,py::arg("G"), py::arg("weight") = py::none(), py::arg("max_iter") = py::none(),py::arg("tol") = py::none());
     m.def("cpp_katz_centrality", &cpp_katz_centrality, py::arg("G"), py::arg("alpha") = 0.1, py::arg("beta") = 1.0, py::arg("max_iter") = 1000, py::arg("tol") = 1e-6, py::arg("normalized") = true);
     m.def("cpp_k_core", &core_decomposition, py::arg("G"));
     m.def("cpp_density", &density, py::arg("G"));
